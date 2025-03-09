@@ -1,0 +1,119 @@
+<div class="signup-container">
+  <div class="left-panel">
+    <div class="logo">
+      <img src="assets/images/icons/Logo.svg" alt="jobify Logo" />
+    </div>
+
+    <div class="tagline">
+      <h1>
+        Ensure a Fast and Successful Journey
+        <span>to Your Next Career Move</span>
+      </h1>
+    </div>
+
+    <div class="benefits">
+      <div class="benefit-item">
+        <span class="icon">✓</span>
+        <span>2X More Qualified Job Matches</span>
+      </div>
+      <div class="benefit-item">
+        <span class="icon">✓</span>
+        <span>60% Time Savings in Job Searches</span>
+      </div>
+      <div class="benefit-item">
+        <span class="icon">✓</span>
+        <span>50% More Interview Invites</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="signup-form-container">
+      <h2>Welcome to <span>jobify</span></h2>
+
+      <button class="google-signup" (click)="signUpWithGoogle()">
+        <img src="assets/images/icons/google-icon.svg" alt="Google" />
+        Sign up with Google
+      </button>
+
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Email"
+            [ngClass]="{
+              invalid:
+                signUpForm.get('email')?.invalid &&
+                signUpForm.get('email')?.touched
+            }"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              signUpForm.get('email')?.invalid &&
+              signUpForm.get('email')?.touched
+            "
+          >
+            <span *ngIf="signUpForm.get('email')?.errors?.['required']"
+              >Email is required</span
+            >
+            <span *ngIf="signUpForm.get('email')?.errors?.['email']"
+              >Please enter a valid email</span
+            >
+          </div>
+        </div>
+
+        <div class="form-group password-group">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Password"
+            [ngClass]="{
+              invalid:
+                signUpForm.get('password')?.invalid &&
+                signUpForm.get('password')?.touched
+            }"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+          >
+            <!-- <img src="assets/images/icons/display.svg" alt="Toggle password visibility"> -->
+          </button>
+          <div
+            class="error-message"
+            *ngIf="
+              signUpForm.get('password')?.invalid &&
+              signUpForm.get('password')?.touched
+            "
+          >
+            <span *ngIf="signUpForm.get('password')?.errors?.['required']"
+              >Password is required</span
+            >
+            <span *ngIf="signUpForm.get('password')?.errors?.['minlength']"
+              >Password must be at least 8 characters</span
+            >
+          </div>
+        </div>
+
+        <button type="submit" class="signup-button">SIGN UP</button>
+
+        <div class="terms">
+          By continuing, you agree to the jobify
+          <a href="/terms">Terms of Service</a> and the
+          <a href="/privacy">Privacy Policy</a>
+        </div>
+      </form>
+
+      <div class="signin-link">
+        Already a member? <a (click)="signIn()">Sign in now</a>
+      </div>
+    </div>
+  </div>
+</div>
