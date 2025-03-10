@@ -1,0 +1,77 @@
+<div class="profile-container">
+  <app-header></app-header>
+  
+  <div class="main-content">
+    <app-nav-sidebar></app-nav-sidebar>
+    
+    <div class="profile-content">
+      <div class="profile-header">
+        <h1>Profile</h1>
+      </div>
+      
+      <div class="profile-form-container">
+        <div class="tabs">
+          <button class="tab-button active">Personal</button>
+          <button class="tab-button">Education</button>
+          <button class="tab-button">Work Experience</button>
+          <button class="tab-button">Skills</button>
+          
+          <button class="update-button">UPDATE</button>
+        </div>
+        
+        <div class="form-section">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" placeholder="First Name">
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" placeholder="Last Name">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="Email">
+            </div>
+            
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" placeholder="Phone">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="linkedin">
+                <img src="assets/images/icons/linkedin1.svg" alt="LinkedIn" class="social-icon">
+                LinkedIn Url
+              </label>
+              <input type="url" id="linkedin" placeholder="LinkedIn profile URL">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="github">
+                <img src="assets/images/icons/github1.svg" alt="GitHub" class="social-icon">
+                Github Url
+              </label>
+              <input type="url" id="github" placeholder="GitHub profile URL">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="portfolio">Portfolio URL</label>
+              <input type="url" id="portfolio" placeholder="Portfolio website URL">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
