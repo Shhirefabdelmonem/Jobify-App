@@ -1,0 +1,272 @@
+<div class="profile-container" [class.sidebar-open]="isSidebarOpen">
+  <div class="mobile-overlay" [class.active]="isSidebarOpen" (click)="toggleSidebar()"></div>
+  
+  <app-nav-sidebar class="sidebar-component" [class.open]="isSidebarOpen"></app-nav-sidebar>
+  
+  <div class="main-content">
+    <app-header></app-header>
+    
+    <div class="page-header">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <span class="menu-icon"></span>
+      </button>
+      <h1>PROFILE</h1>
+    </div>
+    
+    <div class="profile-content">
+      <!-- Privacy Notice -->
+      <div class="privacy-notice">
+        <div class="notice-icon">
+          <img src="assets/images/icons/security.svg" alt="Security">
+        </div>
+        <span>Your profile data is kept private and secure.</span>
+        <div class="info-icon">
+          <img src="assets/images/icons/info.svg" alt="Info">
+        </div>
+      </div>
+      
+      <!-- Profile Navigation Tabs -->
+      <div class="profile-tabs">
+        <button class="tab-button active">Personal</button>
+        <button class="tab-button">Education</button>
+        <button class="tab-button">Work Experience</button>
+        <button class="tab-button">Skills</button>
+        <button class="tab-button">Equal Employment</button>
+      </div>
+      
+      <!-- Personal Information Section -->
+      <div class="profile-section">
+        <div class="section-header">
+          <h2>{{ profileData.personal.firstName }} {{ profileData.personal.lastName }}</h2>
+          <button class="edit-button" (click)="openEditPanel('personal')">
+            <img src="assets/images/icons/edit.svg" alt="Edit">
+          </button>
+        </div>
+        
+        <div class="info-cards">
+          <div class="info-card">
+            <div class="info-icon">
+              <img src="assets/images/icons/location.svg" alt="Location">
+            </div>
+            <div class="info-text">{{ profileData.personal.location }}</div>
+          </div>
+          
+          <div class="info-card">
+            <div class="info-icon">
+              <img src="assets/images/icons/email.svg" alt="Email">
+            </div>
+            <div class="info-text">{{ profileData.personal.email }}</div>
+          </div>
+          
+          <div class="info-card">
+            <div class="info-icon">
+              <img src="assets/images/icons/phone.svg" alt="Phone">
+            </div>
+            <div class="info-text">{{ profileData.personal.phone }}</div>
+          </div>
+          
+          <div class="info-card">
+            <div class="info-icon">
+              <img src="assets/images/icons/linkedin.svg" alt="LinkedIn">
+            </div>
+            <div class="info-text">{{ profileData.social.linkedin }}</div>
+          </div>
+          
+          <div class="info-card">
+            <div class="info-icon">
+              <img src="assets/images/icons/github.svg" alt="GitHub">
+            </div>
+            <div class="info-text">{{ profileData.social.github }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Education Section -->
+      <div class="profile-section">
+        <div class="section-header">
+          <h2>Education</h2>
+          <button class="edit-button" (click)="openEditPanel('education')">
+            <img src="assets/images/icons/edit.svg" alt="Edit">
+          </button>
+        </div>
+        
+        <div class="timeline-item" *ngFor="let edu of profileData.education">
+          <div class="timeline-date">
+            <div class="date-circle"></div>
+            <div class="date-text">{{ edu.startDate }} → {{ edu.endDate }}</div>
+          </div>
+          <div class="timeline-content">
+            <h3>{{ edu.institution }}</h3>
+            <p>{{ edu.degree }}</p>
+            <p class="gpa">{{ edu.gpa }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Work Experience Section -->
+      <div class="profile-section">
+        <div class="section-header">
+          <h2>Work Experience</h2>
+          <button class="edit-button" (click)="openEditPanel('workExperience')">
+            <img src="assets/images/icons/edit.svg" alt="Edit">
+          </button>
+        </div>
+        
+        <div class="timeline-item" *ngFor="let work of profileData.workExperience">
+          <div class="timeline-date">
+            <div class="date-circle"></div>
+            <div class="date-text">{{ work.startDate }} → {{ work.endDate }}</div>
+          </div>
+          <div class="timeline-content" *ngIf="work.company">
+            <h3>{{ work.company }}</h3>
+            <p>{{ work.position }}</p>
+            <p>{{ work.description }}</p>
+          </div>
+          <div class="timeline-content empty-state" *ngIf="!work.company">
+            <p>No work experience added yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Edit Panel (Slides in from right) -->
+  <div class="edit-panel-overlay" [class.active]="isPanelOpen" (click)="closeEditPanel()"></div>
+  <div class="edit-panel" [class.active]="isPanelOpen">
+    <div class="panel-header">
+      <button class="back-button" (click)="closeEditPanel()">
+        <span>←</span>
+      </button>
+      <h2>{{ currentEditSection === 'personal' ? 'Personal' : 
+             currentEditSection === 'education' ? 'Education' : 
+             currentEditSection === 'workExperience' ? 'Work Experience' : 
+             currentEditSection === 'skills' ? 'Skills' : '' }}</h2>
+      <button class="update-button" (click)="updateProfile()">UPDATE</button>
+    </div>
+    
+    <div class="panel-content">
+      <!-- Personal Information Edit Form -->
+      <div class="edit-form" *ngIf="currentEditSection === 'personal'">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="editData.firstName" required>
+          </div>
+          <div class="form-group">
+            <label>Last Name <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="editData.lastName" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email <span class="required">*</span></label>
+            <input type="email" [(ngModel)]="editData.email" required>
+          </div>
+          <div class="form-group">
+            <label>Phone <span class="required">*</span></label>
+            <input type="tel" [(ngModel)]="editData.phone" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>City</label>
+            <input type="text" [(ngModel)]="editData.location">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Postal Code</label>
+            <input type="text" [(ngModel)]="editData.postalCode">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>LinkedIn URL</label>
+            <input type="url" [(ngModel)]="editData.linkedin">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>GitHub URL</label>
+            <input type="url" [(ngModel)]="editData.github">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Education Edit Form -->
+      <div class="edit-form" *ngIf="currentEditSection === 'education'">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="text" [(ngModel)]="editData[0].startDate">
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <input type="text" [(ngModel)]="editData[0].endDate">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Institution</label>
+            <input type="text" [(ngModel)]="editData[0].institution">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Degree</label>
+            <input type="text" [(ngModel)]="editData[0].degree">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>GPA</label>
+            <input type="text" [(ngModel)]="editData[0].gpa">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Work Experience Edit Form -->
+      <div class="edit-form" *ngIf="currentEditSection === 'workExperience'">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="text" [(ngModel)]="editData[0].startDate">
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <input type="text" [(ngModel)]="editData[0].endDate">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Company</label>
+            <input type="text" [(ngModel)]="editData[0].company">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Position</label>
+            <input type="text" [(ngModel)]="editData[0].position">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Description</label>
+            <textarea rows="4" [(ngModel)]="editData[0].description"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
