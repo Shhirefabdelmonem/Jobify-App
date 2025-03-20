@@ -32,7 +32,7 @@
   background-color: #D9FFE5;
 }
 
-.nav-item.active {
+.link-active {
   background-color: #D9FFE5;
   color: #000;
   /* border-left: 3px solid #00c389; */

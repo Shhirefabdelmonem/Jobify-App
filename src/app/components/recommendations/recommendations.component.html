@@ -1,1 +1,72 @@
-<p>recommendations works!</p>
+<div class="recommendations-container">
+    <app-header></app-header>
+
+    <div class="main-content">
+        <app-nav-sidebar></app-nav-sidebar>
+
+        <div class="recommendations-content">
+            <div class="recommendations-header">
+                <h1>Jobs</h1>
+            </div>
+
+            <div class="job-cards">
+                <!-- Job Card -->
+                <div class="job-card">
+                    <div class="job-info-section">
+                        <div class="job-header">
+                            <div class="posted-time">3 weeks ago</div>
+                            <div class="company-logo">
+                                <img src="assets/images/Oracle" alt="compony image ">
+                            </div>
+                            <div class="job-details">
+                                <h2 class="job-title">.NET Developer - Junior</h2>
+                                <p class="company-info">Oracle Information Technology</p>
+                                
+                                <div class="job-attributes">
+                                    <div class="left-attributes">
+                                        <div class="attribute">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>United States</span>
+                                        </div>
+                                        <div class="attribute">
+                                            <i class="far fa-clock"></i>
+                                            <span>Full-time</span>
+                                        </div>
+                                    </div>
+                                  <div class="right-attributes">
+                                    <div class="attribute">
+                                        <i class="fas fa-home"></i>
+                                        <span>Remote</span>
+                                    </div>
+                                    <div class="attribute">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <span>New Grad, Entry Level</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="job-actions">
+                            <button class="apply-btn">APPLY NOW</button>
+                        </div>
+                    </div>
+                    
+                    <div class="match-section">
+                        <div class="match-circle strong-match" [style.--percentage.%]="matchPercentage">
+                            <div class="percentage">{{matchPercentage}}<span>%</span></div>
+                        </div>
+                        <div class="match-label">STRONG MATCH</div>
+                      
+                    </div>
+                </div>
+
+                
+                
+                <!-- You can add more job cards here or generate them dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
