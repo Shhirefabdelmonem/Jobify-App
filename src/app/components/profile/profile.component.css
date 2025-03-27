@@ -68,6 +68,9 @@
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   padding: 20px;
+  height: calc(100vh - 220px); /* Fixed height calculation */
+  display: flex;
+  flex-direction: column;
 }
 
 .tabs {
@@ -76,6 +79,131 @@
   padding-bottom: 15px;
   margin-bottom: 25px;
   position: relative;
+  flex-shrink: 0; /* Prevent tabs from shrinking */
+}
+
+.form-section {
+  padding: 10px 0;
+  font-weight: 600;
+  overflow-y: auto; /* Enable vertical scrolling */
+  flex-grow: 1; /* Take remaining space */
+  scroll-behavior: smooth; /* Enable smooth scrolling */
+}
+
+/* Add these new styles after your existing styles */
+
+.form-content {
+  padding: 20px 0;
+  scroll-margin-top: 20px; /* Adds margin for scroll positioning */
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Add smooth transition */
+}
+
+/* Styles for the form select dropdown */
+.form-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: white;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #00c389;
+}
+
+/* Styles for the textarea */
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #00c389;
+}
+
+/* Enhance tab button transitions */
+.tab-button {
+  transition: color 0.3s ease;
+}
+
+.tab-button.active::after {
+  transition: width 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #444;
+}
+
+.form-content:not(:last-child) {
+  margin-bottom: 40px;
+}
+
+/* Hide all sections except the active one initially */
+.form-content {
+  display: none;
+}
+
+/* Show the first section by default */
+#personal {
+  display: block;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.delete-btn {
+  background: none;
+  border: solid #f2f4f5 1px;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 50%;
+  margin-left: 10px;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.add-btn {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.add-btn:hover {
+  background-color: #e0e0e0;
 }
 
 .tab-button {
@@ -163,4 +291,94 @@ input {
 input:focus {
   outline: none;
   border-color: #00c389;
+}
+
+/* Skills section styles */
+.skills-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skills-input-container {
+  margin-bottom: 10px;
+}
+
+.skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: default;
+}
+
+.remove-skill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.remove-skill:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #ff4d4f;
+}
+
+/* Style for the skill input field */
+#skillInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#skillInput:focus {
+  outline: none;
+  border-color: #00c389;
+}
+
+/* Add a placeholder style for empty skill input */
+.skills-input-container::after {
+  content: 'Add skill...';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.skills-input-container:empty::after {
+  opacity: 1;
+}
+
+.error-message {
+  color: red;
+}
+ h2{
+  font-size: 24px;
+  font-weight: 600;
+  
 }

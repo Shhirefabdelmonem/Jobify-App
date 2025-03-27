@@ -11,65 +11,299 @@
       
       <div class="profile-form-container">
         <div class="tabs">
-          <button class="tab-button active">Personal</button>
-          <button class="tab-button">Education</button>
-          <button class="tab-button">Work Experience</button>
-          <button class="tab-button">Skills</button>
-          
-          <button class="update-button">UPDATE</button>
+          <button class="tab-button" (click)="scrollToSection('personal')">Personal</button>
+          <button class="tab-button" (click)="scrollToSection('education')">Education</button>
+          <button class="tab-button" (click)="scrollToSection('experience')">Work Experience</button>
+          <button class="tab-button" (click)="scrollToSection('skills')">Skills</button>
+          <button class="update-button" (click)="updateProfile()" [disabled]="profileForm.invalid">UPDATE</button>
         </div>
         
-        <div class="form-section">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="firstName">First Name</label>
-              <input type="text" id="firstName" placeholder="First Name">
+        <div class="form-section" #formSection>
+          <form [formGroup]="profileForm">
+            <!-- Personal Section -->
+            <div id="personal" class="form-content" formGroupName="personal">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName">First Name</label>
+                  <input type="text" id="firstName" formControlName="firstName" placeholder="First Name">
+                  <div *ngIf="profileForm.get('personal.firstName')?.touched && profileForm.get('personal.firstName')?.invalid" class="error-message">
+                    <span class="text-danger" *ngIf="profileForm.get('personal.firstName')?.errors?.['required']">First name is required</span>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="lastName">Last Name</label>
+                  <input type="text" id="lastName" formControlName="lastName" placeholder="Last Name">
+                  <div *ngIf="profileForm.get('personal.lastName')?.touched && profileForm.get('personal.lastName')?.invalid" class="error-message">
+                    <span *ngIf="profileForm.get('personal.lastName')?.errors?.['required']">Last name is required</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <input type="email" id="email" formControlName="email" placeholder="Email">
+                  <div *ngIf="profileForm.get('personal.email')?.touched && profileForm.get('personal.email')?.invalid" class="error-message">
+                    <span *ngIf="profileForm.get('personal.email')?.errors?.['required']">Email is required</span>
+                    <span *ngIf="profileForm.get('personal.email')?.errors?.['email']">Please enter a valid email</span>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="phone">Phone</label>
+                  <input type="tel" id="phone" formControlName="phone" placeholder="Phone">
+                  <div *ngIf="profileForm.get('personal.phone')?.touched && profileForm.get('personal.phone')?.invalid" class="error-message">
+                    <span *ngIf="profileForm.get('personal.phone')?.errors?.['required']">Phone number is required</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="linkedin">
+                    <img src="assets/images/icons/linkedin1.svg" alt="LinkedIn" class="social-icon">
+                    LinkedIn Url
+                  </label>
+                  <input type="url" id="linkedin" formControlName="linkedin" placeholder="LinkedIn profile URL">
+                  <div *ngIf="profileForm.get('personal.linkedin')?.touched && profileForm.get('personal.linkedin')?.invalid" class="error-message">
+                    <span *ngIf="profileForm.get('personal.linkedin')?.errors?.['pattern']">Please enter a valid LinkedIn URL</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="github">
+                    <img src="assets/images/icons/github1.svg" alt="GitHub" class="social-icon">
+                    Github Url
+                  </label>
+                  <input type="url" id="github" formControlName="github" placeholder="GitHub profile URL">
+                  <div *ngIf="profileForm.get('personal.github')?.touched && profileForm.get('personal.github')?.invalid" class="error-message">
+                    <span *ngIf="profileForm.get('personal.github')?.errors?.['pattern']">Please enter a valid GitHub URL</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="portfolio">Portfolio URL</label>
+                  <input type="url" id="portfolio" formControlName="portfolio" placeholder="Portfolio website URL">
+                  <div *ngIf="profileForm.get('personal.portfolio')?.touched && profileForm.get('personal.portfolio')?.invalid" class="error-message">
+                    <span *ngIf="profileForm.get('personal.portfolio')?.errors?.['pattern']">Please enter a valid URL</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div class="form-group">
-              <label for="lastName">Last Name</label>
-              <input type="text" id="lastName" placeholder="Last Name">
+
+            <!-- Education Section -->
+            <section id="education" class="form-content">
+              <div class="section-header">
+                <h2>Education</h2>
+              </div>
+              <div formArrayName="educations">
+                <div *ngFor="let education of educations.controls; let i=index" [formGroupName]="i" class="education-entry">
+                  <div class="section-header">
+                    <h3>Education {{i + 1}}</h3>
+                    <button type="button" class="delete-btn" (click)="removeEducation(i)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group full-width">
+                      <label for="schoolName-{{i}}">School Name</label>
+                      <input type="text" id="schoolName-{{i}}" formControlName="schoolName" placeholder="School Name">
+                      <div *ngIf="education.get('schoolName')?.touched && education.get('schoolName')?.invalid" class="error-message">
+                        <span class="text-danger" *ngIf="education.get('schoolName')?.errors?.['required']">School name is required</span>
+                        <span class="text-danger" *ngIf="education.get('schoolName')?.errors?.['minlength']">Minimum 3 characters</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="major-{{i}}">Major</label>
+                      <input type="text" id="major-{{i}}" formControlName="major" placeholder="Major">
+                      <div *ngIf="education.get('major')?.touched && education.get('major')?.invalid" class="error-message">
+                        <span *ngIf="education.get('major')?.errors?.['required']">Major is required</span>
+                        <span *ngIf="education.get('major')?.errors?.['minlength']">Minimum 2 characters</span>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="degreeType-{{i}}">Degree Type</label>
+                      <select id="degreeType-{{i}}" formControlName="degreeType" class="form-select">
+                        <option value="" disabled selected>Select Degree Type</option>
+                        <option value="Bachelor's">Bachelor's</option>
+                        <option value="Master's">Master's</option>
+                        <option value="PhD">PhD</option>
+                        <option value="Associate">Associate</option>
+                        <option value="Diploma">Diploma</option>
+                        <option value="Certificate">Certificate</option>
+                      </select>
+                      <div *ngIf="education.get('degreeType')?.touched && education.get('degreeType')?.invalid" class="error-message">
+                        <span *ngIf="education.get('degreeType')?.errors?.['required']">Degree type is required</span>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="gpa-{{i}}">GPA</label>
+                      <input type="number" id="gpa-{{i}}" formControlName="gpa" placeholder="GPA">
+                      <div *ngIf="education.get('gpa')?.touched && education.get('gpa')?.invalid" class="error-message">
+                        <span *ngIf="education.get('gpa')?.errors?.['min']">GPA must be at least 0</span>
+                        <span *ngIf="education.get('gpa')?.errors?.['max']">GPA must be at most 4</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="startDate-{{i}}">Start Date</label>
+                      <input type="date" id="startDate-{{i}}" formControlName="startDate">
+                      <div *ngIf="education.get('startDate')?.touched && education.get('startDate')?.invalid" class="error-message">
+                        <span *ngIf="education.get('startDate')?.errors?.['required']">Start date is required</span>
+                        <span *ngIf="education.get('startDate')?.errors?.['futureDate']">Start date cannot be in the future</span>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="endDate-{{i}}">End Date</label>
+                      <input type="date" id="endDate-{{i}}" formControlName="endDate">
+                      <div *ngIf="education.get('endDate')?.touched && education.get('endDate')?.invalid" class="error-message">
+                        <span *ngIf="education.get('endDate')?.errors?.['endDateBeforeStart']">End date must be after start date</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr *ngIf="i < educations.length - 1">
+                </div>
+                
+                <div class="form-row">
+                  <button type="button" class="add-btn" (click)="addEducation()">
+                    <i class="fas fa-plus"></i> Add Education
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Work Experience Section -->
+            <section id="experience" class="form-content">
+              <div class="section-header">
+                <h2>Work Experience</h2>
+              </div>
+              <div formArrayName="experiences">
+                <div *ngFor="let experience of experiences.controls; let i=index" [formGroupName]="i" class="experience-entry">
+                  <div class="section-header">
+                    <h3>Experience {{i + 1}}</h3>
+                    <button type="button" class="delete-btn" (click)="removeExperience(i)">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group full-width">
+                      <label for="jobTitle-{{i}}">Job Title</label>
+                      <input type="text" id="jobTitle-{{i}}" formControlName="jobTitle" placeholder="Job Title">
+                      <div *ngIf="experience.get('jobTitle')?.touched && experience.get('jobTitle')?.invalid" class="error-message">
+                        <span class="text-danger" *ngIf="experience.get('jobTitle')?.errors?.['required']">Job title is required</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group full-width">
+                      <label for="company-{{i}}">Company</label>
+                      <input type="text" id="company-{{i}}" formControlName="company" placeholder="Company">
+                      <div *ngIf="experience.get('company')?.touched && experience.get('company')?.invalid" class="error-message">
+                        <span *ngIf="experience.get('company')?.errors?.['required']">Company is required</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="jobType-{{i}}">Job Type</label>
+                      <select id="jobType-{{i}}" formControlName="jobType" class="form-select">
+                        <option value="" disabled selected>Select Job Type</option>
+                        <option value="full-time">Full-time</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="contract">Contract</option>
+                        <option value="internship">Internship</option>
+                        <option value="freelance">Freelance</option>
+                      </select>
+                      <div *ngIf="experience.get('jobType')?.touched && experience.get('jobType')?.invalid" class="error-message">
+                        <span *ngIf="experience.get('jobType')?.errors?.['required']">Job type is required</span>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="location-{{i}}">Location</label>
+                      <input type="text" id="location-{{i}}" formControlName="location" placeholder="Location">
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="workStartDate-{{i}}">Start Date</label>
+                      <input type="date" id="workStartDate-{{i}}" formControlName="startDate">
+                      <div *ngIf="experience.get('startDate')?.touched && experience.get('startDate')?.invalid" class="error-message">
+                        <span *ngIf="experience.get('startDate')?.errors?.['required']">Start date is required</span>
+                        <span *ngIf="experience.get('startDate')?.errors?.['futureDate']">Start date cannot be in the future</span>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="workEndDate-{{i}}">End Date</label>
+                      <input type="date" id="workEndDate-{{i}}" formControlName="endDate">
+                      <div *ngIf="experience.get('endDate')?.touched && experience.get('endDate')?.invalid" class="error-message">
+                        <span *ngIf="experience.get('endDate')?.errors?.['endDateBeforeStart']">End date must be after start date</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group full-width">
+                      <label for="summary-{{i}}">Experience Summary</label>
+                      <textarea id="summary-{{i}}" formControlName="summary" rows="4" placeholder="Describe your responsibilities and achievements..."></textarea>
+                      <div *ngIf="experience.get('summary')?.touched && experience.get('summary')?.invalid" class="error-message">
+                        <span *ngIf="experience.get('summary')?.errors?.['maxlength']">Summary cannot exceed 500 characters</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <hr *ngIf="i < experiences.length - 1">
+                </div>
+                
+                <div class="form-row">
+                  <button type="button" class="add-btn" (click)="addExperience()">
+                    <i class="fas fa-plus"></i> Add Work Experience
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Skills Section -->
+            <div id="skills" class="form-content">
+              <div class="section-header">
+                <h2>Skills</h2>
+              </div>
+              <div class="skills-container">
+                <div class="skills-input-container">
+                  <div class="form-group">
+                    <label for="skillInput">Add Skills</label>
+                    <input type="text" id="skillInput" (keydown)="onSkillKeyPress($event)" placeholder="Type a skill and press Enter">
+                  </div>
+                </div>
+                <div class="skills-tags" formArrayName="skills">
+                  <div *ngFor="let skill of skills.controls; let i=index" [formGroupName]="i" class="skill-tag">
+                    {{ skill.get('skillName')?.value }}
+                    <span class="remove-skill" (click)="removeSkill(i)">×</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" placeholder="Email">
-            </div>
-            
-            <div class="form-group">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" placeholder="Phone">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label for="linkedin">
-                <img src="assets/images/icons/linkedin1.svg" alt="LinkedIn" class="social-icon">
-                LinkedIn Url
-              </label>
-              <input type="url" id="linkedin" placeholder="LinkedIn profile URL">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label for="github">
-                <img src="assets/images/icons/github1.svg" alt="GitHub" class="social-icon">
-                Github Url
-              </label>
-              <input type="url" id="github" placeholder="GitHub profile URL">
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label for="portfolio">Portfolio URL</label>
-              <input type="url" id="portfolio" placeholder="Portfolio website URL">
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
