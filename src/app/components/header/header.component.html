@@ -4,6 +4,12 @@
   </div>
   
   <div class="nav-links">
-    <a href="#" class="nav-link">log out </a>
+    <ng-container *ngIf="isLoggedIn;">
+      <a (click)="logout()" class="nav-link logout-link">Log out</a>
+    </ng-container>
+    <ng-container *ngIf="!isLoggedIn;">
+      <a [routerLink]="['/sign-in']" class="nav-link login-link">Log in</a>
+    </ng-container>
+    
   </div>
 </header>

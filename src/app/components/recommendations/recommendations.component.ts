@@ -12,6 +12,6 @@ export class RecommendationsComponent {
 
   matchPercentage:number;
   constructor(){
-    this.matchPercentage = 80;
+    this.matchPercentage = 65;
   }
 }

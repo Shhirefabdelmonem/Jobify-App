@@ -1,23 +1,84 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService, RegisterDTO } from '../../services/auth.service';
+import { finalize } from 'rxjs/operators';
 
-import { SignUpComponent } from './sign-up.component';
+@Component({
+  selector: 'app-sign-up',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './sign-up.component.html',
+  styleUrls: ['./sign-up.component.css']
+})
+export class SignUpComponent {
+  signUpForm: FormGroup;
+  showPassword = false;
+  isLoading = false;
+  errorMessage = '';
+  
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private authService: AuthService
+  ) {
+    this.signUpForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      receiveUpdates: [true]
+    });
+  }
 
-describe('SignUpComponent', () => {
-  let component: SignUpComponent;
-  let fixture: ComponentFixture<SignUpComponent>;
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [SignUpComponent]
-    })
-    .compileComponents();
+  signUpWithGoogle() {
+    // Implement Google sign-up logic
+    console.log('Sign up with Google clicked');
+  }
 
-    fixture = TestBed.createComponent(SignUpComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  onSubmit() {
+    if (this.signUpForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      
+      const registerData: RegisterDTO = {
+        username: this.signUpForm.value.email,
+        password: this.signUpForm.value.password
+      };
+      
+      this.authService.register(registerData)
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              console.log('Registration successful');
+              // Navigate to dashboard or home page after successful registration
+              this.router.navigate(['/dashboard']);
+            } else {
+              this.errorMessage = response.message || 'Registration failed';
+            }
+          },
+          error: (error) => {
+            console.error('Registration error:', error);
+            this.errorMessage = error.error?.message || 'An error occurred during registration. Please try again.';
+          }
+        });
+    } else {
+      // Mark all fields as touched to trigger validation messages
+      Object.keys(this.signUpForm.controls).forEach(key => {
+        this.signUpForm.get(key)?.markAsTouched();
+      });
+    }
+  }
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+  signIn() {
+    this.router.navigate(['/signin']);
+  }
+}

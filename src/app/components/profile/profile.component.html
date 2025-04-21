@@ -27,7 +27,7 @@
                   <label for="firstName">First Name</label>
                   <input type="text" id="firstName" formControlName="firstName" placeholder="First Name">
                   <div *ngIf="profileForm.get('personal.firstName')?.touched && profileForm.get('personal.firstName')?.invalid" class="error-message">
-                    <span class="text-danger" *ngIf="profileForm.get('personal.firstName')?.errors?.['required']">First name is required</span>
+                    <span *ngIf="profileForm.get('personal.firstName')?.errors?.['required']">First name is required</span>
                   </div>
                 </div>
                 
@@ -115,8 +115,8 @@
                       <label for="schoolName-{{i}}">School Name</label>
                       <input type="text" id="schoolName-{{i}}" formControlName="schoolName" placeholder="School Name">
                       <div *ngIf="education.get('schoolName')?.touched && education.get('schoolName')?.invalid" class="error-message">
-                        <span class="text-danger" *ngIf="education.get('schoolName')?.errors?.['required']">School name is required</span>
-                        <span class="text-danger" *ngIf="education.get('schoolName')?.errors?.['minlength']">Minimum 3 characters</span>
+                        <span *ngIf="education.get('schoolName')?.errors?.['required']">School name is required</span>
+                        <span *ngIf="education.get('schoolName')?.errors?.['minlength']">Minimum 3 characters</span>
                       </div>
                     </div>
                   </div>
@@ -206,7 +206,7 @@
                       <label for="jobTitle-{{i}}">Job Title</label>
                       <input type="text" id="jobTitle-{{i}}" formControlName="jobTitle" placeholder="Job Title">
                       <div *ngIf="experience.get('jobTitle')?.touched && experience.get('jobTitle')?.invalid" class="error-message">
-                        <span class="text-danger" *ngIf="experience.get('jobTitle')?.errors?.['required']">Job title is required</span>
+                        <span *ngIf="experience.get('jobTitle')?.errors?.['required']">Job title is required</span>
                       </div>
                     </div>
                   </div>

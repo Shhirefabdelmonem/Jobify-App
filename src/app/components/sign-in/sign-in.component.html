@@ -6,8 +6,8 @@
 
     <div class="tagline">
       <h1>
-        Ensure a Fast and Successful Journey
-        <span>to Your Next Career Move</span>
+        Welcome Back to Your
+        <span>Professional Journey</span>
       </h1>
     </div>
 
@@ -25,22 +25,23 @@
         <span>50% More Interview Invites</span>
       </div>
     </div>
+  
   </div>
 
   <div class="right-panel">
     <div class="signup-form-container">
-      <h2>Welcome to <span>jobify</span></h2>
+      <h2>Sign in to <span>jobify</span></h2>
 
-      <button class="google-signup" (click)="signUpWithGoogle()">
+      <button class="google-signup" (click)="signInWithGoogle()">
         <img src="assets/images/icons/google-icon.svg" alt="Google" />
-        Sign up with Google
+        Sign in with Google
       </button>
 
       <div class="divider">
         <span>OR</span>
       </div>
 
-      <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="signInForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <input
             type="email"
@@ -48,21 +49,21 @@
             placeholder="Email"
             [ngClass]="{
               invalid:
-                signUpForm.get('email')?.invalid &&
-                signUpForm.get('email')?.touched
+                signInForm.get('email')?.invalid &&
+                signInForm.get('email')?.touched
             }"
           />
           <div
             class="error-message"
             *ngIf="
-              signUpForm.get('email')?.invalid &&
-              signUpForm.get('email')?.touched
+              signInForm.get('email')?.invalid &&
+              signInForm.get('email')?.touched
             "
           >
-            <span *ngIf="signUpForm.get('email')?.errors?.['required']"
+            <span *ngIf="signInForm.get('email')?.errors?.['required']"
               >Email is required</span
             >
-            <span *ngIf="signUpForm.get('email')?.errors?.['email']"
+            <span *ngIf="signInForm.get('email')?.errors?.['email']"
               >Please enter a valid email</span
             >
           </div>
@@ -75,8 +76,8 @@
             placeholder="Password"
             [ngClass]="{
               invalid:
-                signUpForm.get('password')?.invalid &&
-                signUpForm.get('password')?.touched
+                signInForm.get('password')?.invalid &&
+                signInForm.get('password')?.touched
             }"
           />
           <button
@@ -89,15 +90,12 @@
           <div
             class="error-message"
             *ngIf="
-              signUpForm.get('password')?.invalid &&
-              signUpForm.get('password')?.touched
+              signInForm.get('password')?.invalid &&
+              signInForm.get('password')?.touched
             "
           >
-            <span *ngIf="signUpForm.get('password')?.errors?.['required']"
+            <span *ngIf="signInForm.get('password')?.errors?.['required']"
               >Password is required</span
-            >
-            <span *ngIf="signUpForm.get('password')?.errors?.['minlength']"
-              >Password must be at least 8 characters</span
             >
           </div>
         </div>
@@ -108,20 +106,19 @@
         </div>
 
         <button type="submit" class="signup-button" [disabled]="isLoading">
-          <span *ngIf="!isLoading">SIGN UP</span>
-          <span *ngIf="isLoading">SIGNING UP...</span>
+          <span *ngIf="!isLoading">SIGN IN</span>
+          <span *ngIf="isLoading">SIGNING IN...</span>
         </button>
 
         <div class="terms">
-          By continuing, you agree to the jobify
-          <a href="/terms">Terms of Service</a> and the
-          <a href="/privacy">Privacy Policy</a>
+          <a href="/forgot-password">Forgot password?</a>
         </div>
       </form>
 
       <div class="signin-link">
-        Already a member? <a (click)="signIn()">Sign in now</a>
+        Don't have an account? <a (click)="signUp()">Sign up now</a>
       </div>
     </div>
   </div>
 </div>
+  
