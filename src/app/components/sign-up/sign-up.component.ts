@@ -119,6 +119,6 @@ export class SignUpComponent {
   }
 
   signIn() {
-    this.router.navigate(['/signin']);
+    this.router.navigate(['/sign-in']);
   }
 }

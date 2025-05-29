@@ -245,7 +245,16 @@ textarea:focus {
   /* padding: 10px 25px; */
   font-weight: 700;
   text-transform: uppercase;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
+
+.update-button:disabled {
+  background-color: #91ffda;
+  color: #000;
+  cursor: not-allowed;
+}
+
 
 .form-section {
   padding: 10px 0;

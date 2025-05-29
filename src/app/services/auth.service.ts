@@ -16,7 +16,9 @@ export interface LogInDTO {
 }
 
 export interface RefreshTokenRequestDTO {
-  refreshToken: string;
+  Request: {
+    refreshToken: string;
+  };
 }
 
 export interface AuthResponse {
@@ -33,7 +35,7 @@ export interface AuthResponse {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = `${environment.baseUrl}/api`; 
+  private readonly API_URL = `${environment.baseUrl}/api`;
   private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly TOKEN_EXPIRES_KEY = 'token_expires';
@@ -85,14 +87,12 @@ export class AuthService {
       return throwError(() => new Error('No refresh token available'));
     }
 
+    const command = {
+      refreshToken: refreshToken,
+    };
+
     return this.http
-      .post<AuthResponse>(
-        `${this.API_URL}/Auth/logout`,
-        JSON.stringify(refreshToken),
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
+      .post<AuthResponse>(`${this.API_URL}/Auth/logout`, command)
       .pipe(
         tap(() => {
           this.clearTokens();
@@ -113,7 +113,11 @@ export class AuthService {
       return throwError(() => new Error('No refresh token available'));
     }
 
-    const request: RefreshTokenRequestDTO = { refreshToken };
+    const request: RefreshTokenRequestDTO = {
+      Request: {
+        refreshToken: refreshToken
+      }
+    };
 
     return this.http
       .post<AuthResponse>(`${this.API_URL}/Auth/refresh-token`, request)
@@ -121,6 +125,7 @@ export class AuthService {
         tap((response) => {
           if (response.success && response.data) {
             this.storeTokens(response.data);
+            this.isAuthenticatedSubject.next(true); // Add this line to update the authentication state
           }
         }),
         catchError((error) => {
