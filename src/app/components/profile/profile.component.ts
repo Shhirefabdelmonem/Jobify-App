@@ -109,8 +109,9 @@ export class ProfileComponent implements OnInit {
   }
 
   // Skills methods
-  createSkill(skillName: string): FormGroup {
+  createSkill(skillName: string, id?: number): FormGroup {
     return this._fb.group({
+      id: [id || null],
       skillName: [skillName, [Validators.required, Validators.minLength(2)]],
     });
   }
@@ -180,6 +181,36 @@ export class ProfileComponent implements OnInit {
 
       // Transform the form data to match the backend's expected structure
       const formData = this.profileForm.value;
+
+      // Map educations with IDs
+      const mappedEducations = formData.educations.map((edu: any) => ({
+        id: edu.id || null,
+        schoolName: edu.schoolName,
+        major: edu.major,
+        degreeType: edu.degreeType,
+        gpa: edu.gpa,
+        startDate: edu.startDate,
+        endDate: edu.endDate,
+      }));
+
+      // Map experiences with IDs
+      const mappedExperiences = formData.experiences.map((exp: any) => ({
+        id: exp.id || null,
+        jobTitle: exp.jobTitle,
+        company: exp.company,
+        jobType: exp.jobType,
+        location: exp.location,
+        startDate: exp.startDate,
+        endDate: exp.endDate,
+        summary: exp.summary,
+      }));
+
+      // Map skills with IDs
+      const mappedSkills = formData.skills.map((skill: any) => ({
+        id: skill.id || null,
+        skillName: skill.skillName,
+      }));
+
       const transformedData = {
         firstName: formData.personal.firstName,
         lastName: formData.personal.lastName,
@@ -188,9 +219,9 @@ export class ProfileComponent implements OnInit {
         linkedin: formData.personal.linkedin,
         github: formData.personal.github,
         portfolio: formData.personal.portfolio,
-        educations: formData.educations,
-        experiences: formData.experiences,
-        skills: formData.skills,
+        educations: mappedEducations,
+        experiences: mappedExperiences,
+        skills: mappedSkills,
       };
 
       this.profileService.updateProfile(transformedData).subscribe({
@@ -274,8 +305,8 @@ export class ProfileComponent implements OnInit {
           lastName: data.lastName || data.LastName,
           email: data.email || data.Email,
           phone: data.phone || data.Phone,
-          linkedin: data.linkedin || data.LinkedIn,
-          github: data.github || data.GitHub,
+          linkedin: data.linkedIn || data.LinkedIn || data.linkedin,
+          github: data.gitHub || data.GitHub || data.github,
           portfolio: data.portfolio || data.Portfolio,
         },
       });
@@ -284,37 +315,123 @@ export class ProfileComponent implements OnInit {
     if (data.educations && Array.isArray(data.educations)) {
       this.educations.clear();
       data.educations.forEach((edu: any) => {
-        this.educations.push(this._fb.group(edu));
+        const educationGroup = this._fb.group({
+          id: [edu.id],
+          schoolName: [
+            edu.schoolName,
+            [Validators.required, Validators.minLength(3)],
+          ],
+          major: [edu.major, [Validators.required, Validators.minLength(2)]],
+          degreeType: [edu.degreeType, Validators.required],
+          gpa: [edu.gpa, [Validators.min(0), Validators.max(4)]],
+          startDate: [
+            this.formatDateForInput(edu.startDate),
+            [Validators.required, this.futureDateValidator],
+          ],
+          endDate: [
+            this.formatDateForInput(edu.endDate),
+            this.endDateValidator,
+          ],
+        });
+        this.educations.push(educationGroup);
       });
     } else if (data.Educations && Array.isArray(data.Educations)) {
       this.educations.clear();
       data.Educations.forEach((edu: any) => {
-        this.educations.push(this._fb.group(edu));
+        const educationGroup = this._fb.group({
+          id: [edu.id],
+          schoolName: [
+            edu.schoolName,
+            [Validators.required, Validators.minLength(3)],
+          ],
+          major: [edu.major, [Validators.required, Validators.minLength(2)]],
+          degreeType: [edu.degreeType, Validators.required],
+          gpa: [edu.gpa, [Validators.min(0), Validators.max(4)]],
+          startDate: [
+            this.formatDateForInput(edu.startDate),
+            [Validators.required, this.futureDateValidator],
+          ],
+          endDate: [
+            this.formatDateForInput(edu.endDate),
+            this.endDateValidator,
+          ],
+        });
+        this.educations.push(educationGroup);
       });
     }
 
     if (data.experiences && Array.isArray(data.experiences)) {
       this.experiences.clear();
       data.experiences.forEach((exp: any) => {
-        this.experiences.push(this._fb.group(exp));
+        const experienceGroup = this._fb.group({
+          id: [exp.id],
+          jobTitle: [exp.jobTitle, Validators.required],
+          company: [exp.company, Validators.required],
+          jobType: [exp.jobType, Validators.required],
+          location: [exp.location],
+          startDate: [
+            this.formatDateForInput(exp.startDate),
+            [Validators.required, this.futureDateValidator],
+          ],
+          endDate: [
+            this.formatDateForInput(exp.endDate),
+            this.endDateValidator,
+          ],
+          summary: [exp.summary, Validators.maxLength(500)],
+        });
+        this.experiences.push(experienceGroup);
       });
     } else if (data.Experiences && Array.isArray(data.Experiences)) {
       this.experiences.clear();
       data.Experiences.forEach((exp: any) => {
-        this.experiences.push(this._fb.group(exp));
+        const experienceGroup = this._fb.group({
+          id: [exp.id],
+          jobTitle: [exp.jobTitle, Validators.required],
+          company: [exp.company, Validators.required],
+          jobType: [exp.jobType, Validators.required],
+          location: [exp.location],
+          startDate: [
+            this.formatDateForInput(exp.startDate),
+            [Validators.required, this.futureDateValidator],
+          ],
+          endDate: [
+            this.formatDateForInput(exp.endDate),
+            this.endDateValidator,
+          ],
+          summary: [exp.summary, Validators.maxLength(500)],
+        });
+        this.experiences.push(experienceGroup);
       });
     }
 
     if (data.skills && Array.isArray(data.skills)) {
       this.skills.clear();
       data.skills.forEach((skill: any) => {
-        this.skills.push(this.createSkill(skill.skillName));
+        this.skills.push(this.createSkill(skill.skillName, skill.id));
       });
     } else if (data.Skills && Array.isArray(data.Skills)) {
       this.skills.clear();
       data.Skills.forEach((skill: any) => {
-        this.skills.push(this.createSkill(skill.SkillName || skill.skillName));
+        this.skills.push(
+          this.createSkill(
+            skill.SkillName || skill.skillName,
+            skill.id || skill.Id
+          )
+        );
       });
+    }
+  }
+
+  // Helper method to format date for HTML input
+  private formatDateForInput(dateString: string): string {
+    if (!dateString) return '';
+
+    try {
+      const date = new Date(dateString);
+      // Format as YYYY-MM-DD for HTML date input
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      return '';
     }
   }
 
