@@ -1,0 +1,78 @@
+<!-- Modal Backdrop -->
+<div
+  class="modal-backdrop"
+  *ngIf="isVisible"
+  (click)="onBackdropClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+  aria-describedby="modal-description"
+>
+  <!-- Modal Container -->
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Close Button -->
+    <button
+      class="close-btn"
+      (click)="closeModal()"
+      aria-label="Close modal"
+      type="button"
+    >
+      <i class="fas fa-times"></i>
+    </button>
+
+    <!-- Modal Content -->
+    <div class="modal-content">
+      <!-- Icon -->
+      <div class="modal-icon">
+        <i class="fas fa-briefcase"></i>
+      </div>
+
+      <!-- Title -->
+      <h2 id="modal-title" class="modal-title">Did you apply?</h2>
+
+      <!-- Description -->
+      <p id="modal-description" class="modal-description">
+        Let us know so we can help you track your application 
+      </p>
+
+      <!-- Job Info (Optional - for context) -->
+      <div class="job-context" *ngIf="jobTitle && company">
+        <div class="job-info">
+          <span class="job-title-context">{{ jobTitle }}</span>
+          <span class="company-context">at {{ company }}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="modal-actions">
+        <!-- Yes Button -->
+        <button
+          class="action-btn primary-btn"
+          (click)="onApplicationResponse(true)"
+          type="button"
+        >
+          <i class="fas fa-check"></i>
+          Yes, I applied!
+        </button>
+
+        <!-- No Button -->
+        <button
+          class="action-btn secondary-btn"
+          (click)="onApplicationResponse(false)"
+          type="button"
+        >
+          <i class="fas fa-times"></i>
+          No, I didn't apply
+        </button>
+      </div>
+
+      <!-- Additional Info -->
+      <div class="modal-footer">
+        <p class="footer-text">
+          <i class="fas fa-shield-alt"></i>
+          Your response helps us improve your job recommendations
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

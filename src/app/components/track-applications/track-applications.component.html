@@ -1,0 +1,290 @@
+<div class="track-applications-container">
+  <app-header></app-header>
+
+  <div class="main-content">
+    <app-nav-sidebar></app-nav-sidebar>
+
+    <div class="track-applications-content">
+      <!-- Header Section -->
+      <div class="track-applications-header">
+        <div class="header-content">
+          <div class="title-section">
+            <h1>Track Applications</h1>
+            <p class="subtitle">
+              Monitor your job application progress and manage your pipeline
+            </p>
+          </div>
+          <div class="stats-section">
+            <div class="stat-item">
+              <span class="stat-number">{{ trackedApplications.length }}</span>
+              <span class="stat-label">Total Applications</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Tabs -->
+      <div class="status-tabs">
+        <button
+          *ngFor="let status of applicationStatuses"
+          class="status-tab"
+          [class.active]="selectedStatus === status"
+          [class]="getStatusClass(status)"
+          (click)="selectStatus(status)"
+        >
+          <span class="tab-label">{{ status }}</span>
+          <span class="tab-count">{{ getStatusCount(status) }}</span>
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-animation">
+          <div class="loading-spinner"></div>
+          <h3>Loading your applications...</h3>
+          <p>Gathering your job application history</p>
+        </div>
+      </div>
+
+      <!-- Applications List -->
+      <div class="applications-list" *ngIf="!isLoading">
+        <!-- Job Cards -->
+        <div class="job-cards" *ngIf="filteredApplications.length > 0">
+          <div
+            class="job-card"
+            *ngFor="let application of filteredApplications"
+            [class.featured]="
+              getMatchPercentage(application.combinedMatchScore || '0%') >= 85
+            "
+          >
+            <!-- Featured Badge -->
+            <div
+              class="featured-badge"
+              *ngIf="
+                getMatchPercentage(application.combinedMatchScore || '0%') >= 85
+              "
+            >
+              <i class="fas fa-star"></i>
+              <span>Top Match</span>
+            </div>
+
+            <div class="job-info-section">
+              <div class="job-header">
+                <div class="posted-time">
+                  <i class="far fa-clock"></i>
+                  <span>{{ getTimeAgo(application.appliedDate) }}</span>
+                </div>
+
+                <!-- Status Dropdown -->
+                <div class="status-dropdown-container">
+                  <select
+                    class="status-dropdown"
+                    [value]="application.status"
+                    [class]="getStatusClass(application.status)"
+                    title="Update application status"
+                    aria-label="Update application status"
+                    (change)="
+                      updateApplicationStatus(
+                        application.id,
+                        $any($event.target).value
+                      )
+                    "
+                  >
+                    <option
+                      *ngFor="let status of applicationStatuses"
+                      [value]="status"
+                    >
+                      {{ status }}
+                    </option>
+                  </select>
+                  <i class="fas fa-chevron-down dropdown-icon"></i>
+                </div>
+
+                <div class="company-logo">
+                  <div class="logo-placeholder">
+                    {{ getCompanyInitials(application.company) }}
+                  </div>
+                </div>
+
+                <div class="job-details">
+                  <h2 class="job-title">{{ application.jobTitle }}</h2>
+                  <p class="company-info">
+                    <i class="fas fa-building"></i>
+                    {{ application.company }}
+                  </p>
+
+                  <!-- Skills Tags -->
+                  <div
+                    class="skills-section"
+                    *ngIf="application.skillsRequired"
+                  >
+                    <div class="skills-label">Required Skills:</div>
+                    <div class="skills-tags">
+                      <span
+                        class="skill-tag"
+                        *ngFor="
+                          let skill of getSkillsArray(
+                            application.skillsRequired
+                          )
+                        "
+                      >
+                        {{ skill }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Job Attributes -->
+                  <div class="job-attributes">
+                    <div class="attribute" *ngIf="application.location">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <span>{{ application.location }}</span>
+                    </div>
+                    <div class="attribute" *ngIf="application.jobType">
+                      <i class="far fa-clock"></i>
+                      <span>{{ application.jobType }}</span>
+                    </div>
+                    <div class="attribute" *ngIf="application.salaryRange">
+                      <i class="fas fa-dollar-sign"></i>
+                      <span>{{ application.salaryRange }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Application Status Indicator -->
+                  <div class="application-status">
+                    <div
+                      class="status-indicator"
+                      [class]="getStatusClass(application.status)"
+                    >
+                      <i
+                        class="fas fa-check"
+                        *ngIf="application.status === 'Applied'"
+                      ></i>
+                      <i
+                        class="fas fa-clipboard-list"
+                        *ngIf="application.status === 'Get Assessment'"
+                      ></i>
+                      <i
+                        class="fas fa-users"
+                        *ngIf="application.status === 'Interviewing'"
+                      ></i>
+                      <i
+                        class="fas fa-handshake"
+                        *ngIf="application.status === 'Offer Received'"
+                      ></i>
+                      <i
+                        class="fas fa-times"
+                        *ngIf="application.status === 'Rejected'"
+                      ></i>
+                      <i
+                        class="fas fa-archive"
+                        *ngIf="application.status === 'Archived'"
+                      ></i>
+                      <span>{{ application.status }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="job-actions">
+                <button class="action-btn save" title="Save Job">
+                  <i class="far fa-bookmark"></i>
+                </button>
+                <button class="action-btn share" title="Share Job">
+                  <i class="fas fa-share-alt"></i>
+                </button>
+                <button
+                  class="action-btn view"
+                  title="View Original Job"
+                  *ngIf="application.jobLink"
+                >
+                  <i class="fas fa-external-link-alt"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Enhanced Match Section -->
+            <div class="match-section" *ngIf="application.combinedMatchScore">
+              <div
+                class="match-circle"
+                [class.excellent-match]="
+                  getMatchPercentage(application.combinedMatchScore) >= 90
+                "
+                [class.strong-match]="
+                  getMatchPercentage(application.combinedMatchScore) >= 80 &&
+                  getMatchPercentage(application.combinedMatchScore) < 90
+                "
+                [class.good-match]="
+                  getMatchPercentage(application.combinedMatchScore) >= 70 &&
+                  getMatchPercentage(application.combinedMatchScore) < 80
+                "
+                [style.--percentage.%]="
+                  getMatchPercentage(application.combinedMatchScore)
+                "
+              >
+                <div class="percentage">
+                  {{ getMatchPercentage(application.combinedMatchScore)
+                  }}<span>%</span>
+                </div>
+              </div>
+
+              <div class="match-details">
+                <div class="match-label">
+                  {{ getMatchLabel(application.combinedMatchScore) }}
+                </div>
+              </div>
+
+              <!-- AI Recommendation -->
+              <div class="ai-recommendation">
+                <i class="fas fa-lightbulb"></i>
+                <span>{{
+                  getAIRecommendation(application.combinedMatchScore)
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredApplications.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <h3>No {{ selectedStatus.toLowerCase() }} applications</h3>
+          <p *ngIf="selectedStatus === 'Applied'">
+            Start applying to jobs from the recommendations page to see them
+            here.
+          </p>
+          <p *ngIf="selectedStatus !== 'Applied'">
+            No applications in "{{ selectedStatus }}" status yet.
+          </p>
+          <button class="browse-jobs-btn" *ngIf="selectedStatus === 'Applied'">
+            <i class="fas fa-search"></i>
+            Browse Job Recommendations
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Section -->
+      <div
+        class="summary-section"
+        *ngIf="!isLoading && trackedApplications.length > 0"
+      >
+        <div class="summary-card">
+          <h3>Application Summary</h3>
+          <div class="summary-stats">
+            <div
+              class="summary-stat"
+              *ngFor="let status of applicationStatuses"
+            >
+              <span class="stat-label">{{ status }}</span>
+              <span class="stat-value" [class]="getStatusClass(status)">
+                {{ getStatusCount(status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -128,6 +128,48 @@
                     <span>Competitive</span>
                   </div>
                 </div>
+
+                <!-- Application Status Indicator -->
+                <div
+                  class="application-status"
+                  *ngIf="
+                    getApplicationStatus(job.job_title, job.company) !==
+                    'unknown'
+                  "
+                >
+                  <div
+                    class="status-indicator"
+                    [class.applied]="
+                      getApplicationStatus(job.job_title, job.company) ===
+                      'applied'
+                    "
+                    [class.not-applied]="
+                      getApplicationStatus(job.job_title, job.company) ===
+                      'not-applied'
+                    "
+                  >
+                    <i
+                      class="fas fa-check"
+                      *ngIf="
+                        getApplicationStatus(job.job_title, job.company) ===
+                        'applied'
+                      "
+                    ></i>
+                    <i
+                      class="fas fa-times"
+                      *ngIf="
+                        getApplicationStatus(job.job_title, job.company) ===
+                        'not-applied'
+                      "
+                    ></i>
+                    <span>{{
+                      getApplicationStatus(job.job_title, job.company) ===
+                      "applied"
+                        ? "Applied"
+                        : "Not Applied"
+                    }}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -139,10 +181,26 @@
               <button class="action-btn share" title="Share Job">
                 <i class="fas fa-share-alt"></i>
               </button>
-              <a [href]="job.job_link" target="_blank" class="apply-btn">
-                <i class="fas fa-paper-plane"></i>
-                APPLY NOW
-              </a>
+              <button
+                class="apply-btn"
+                (click)="onApplyClick(job, $event)"
+                [class.applied]="hasAppliedToJob(job.job_title, job.company)"
+                [disabled]="hasAppliedToJob(job.job_title, job.company)"
+              >
+                <i
+                  class="fas fa-paper-plane"
+                  *ngIf="!hasAppliedToJob(job.job_title, job.company)"
+                ></i>
+                <i
+                  class="fas fa-check"
+                  *ngIf="hasAppliedToJob(job.job_title, job.company)"
+                ></i>
+                {{
+                  hasAppliedToJob(job.job_title, job.company)
+                    ? "APPLIED"
+                    : "APPLY NOW"
+                }}
+              </button>
             </div>
           </div>
 
@@ -214,3 +272,14 @@
     </div>
   </div>
 </div>
+
+<!-- Apply Pop-up Modal -->
+<app-apply-pop-up
+  [isVisible]="showApplyModal"
+  [jobTitle]="selectedJob?.job_title || ''"
+  [company]="selectedJob?.company || ''"
+  [jobId]="selectedJob?.job_title + '-' + selectedJob?.company"
+  (applicationTracked)="onApplicationTracked($event)"
+  (modalClosed)="onModalClosed()"
+>
+</app-apply-pop-up>

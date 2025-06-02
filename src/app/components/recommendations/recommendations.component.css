@@ -966,3 +966,60 @@
 .company-logo:hover {
     transform: scale(1.05);
 }
+
+/* Application Status Indicator */
+.application-status {
+    margin-top: 12px;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-indicator.applied {
+    background: linear-gradient(135deg, #d9ffe5 0%, #00f0a0 100%);
+    color: #1a1a1a;
+    border: 1px solid #00f0a0;
+}
+
+.status-indicator.not-applied {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+.status-indicator i {
+    font-size: 10px;
+}
+
+/* Enhanced Apply Button States */
+.apply-btn.applied {
+    background: linear-gradient(135deg, #d9ffe5 0%, #00f0a0 100%);
+    color: #1a1a1a;
+    cursor: default;
+    opacity: 0.8;
+}
+
+.apply-btn.applied:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 240, 160, 0.2);
+    background: linear-gradient(135deg, #d9ffe5 0%, #00f0a0 100%);
+}
+
+.apply-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.apply-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}

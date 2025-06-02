@@ -4,10 +4,12 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { SignUpComponent } from './components/sign-up/sign-up.component';
 import { SignInComponent } from './components/sign-in/sign-in.component';
 import { HomeComponent } from './components/home/home.component';
+import { TrackApplicationsComponent } from './components/track-applications/track-applications.component';
 
 export const routes: Routes = [
     {path: 'recommendations',component:RecommendationsComponent},
     {path:'profile',component:ProfileComponent},
+    {path:'applications',component:TrackApplicationsComponent},
     {path:'sign-up',component:SignUpComponent},
     {path:'sign-in',component:SignInComponent},
     {path:'home',component:HomeComponent},
