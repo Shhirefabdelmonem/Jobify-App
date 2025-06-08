@@ -10,7 +10,13 @@ import {
   RecommendationsService,
   Job,
 } from '../../services/recommendations.service';
-import { ApplicationStatus } from '../track-applications/track-applications.component';
+import {
+  TrackApplicationsService,
+  UpdateJobApplicationCommand,
+  ApplicationStatus,
+  AddJobApplicationCommand,
+  AddJobApplicationResponse,
+} from '../../services/track-applications.service';
 
 @Component({
   selector: 'app-recommendations',
@@ -35,11 +41,18 @@ export class RecommendationsComponent implements OnInit {
   // Application tracking
   applicationHistory: ApplicationTrackingData[] = [];
 
-  constructor(private recommendationsService: RecommendationsService) {}
+  // Toast notification state
+  showToast: boolean = false;
+  toastMessage: string = '';
+  toastType: 'success' | 'error' = 'success';
+
+  constructor(
+    private recommendationsService: RecommendationsService,
+    private trackApplicationsService: TrackApplicationsService
+  ) {}
 
   ngOnInit(): void {
     this.fetchRecommendedJobs();
-    this.loadApplicationHistory();
   }
 
   fetchRecommendedJobs(): void {
@@ -81,103 +94,79 @@ export class RecommendationsComponent implements OnInit {
 
   // Handle application tracking response
   onApplicationTracked(trackingData: ApplicationTrackingData): void {
-    // Add to application history
+    // Add to application history for local tracking
     this.applicationHistory.push(trackingData);
 
-    // Save to localStorage for persistence
-    this.saveApplicationHistory();
-
-    // Log for debugging (in production, this would be sent to your backend)
+    // Log for debugging
     console.log('Application tracked:', trackingData);
 
-    // Here you would typically send this data to your backend API
-    // this.recommendationsService.trackApplication(trackingData).subscribe(...);
-
-    // Show success message or update UI as needed
-    this.showSuccessMessage(trackingData);
-
-    // If user applied, also save to track-applications format
-    if (trackingData.applied) {
-      this.saveToTrackApplications(trackingData);
+    // If user applied, add the job application to the database
+    if (trackingData.applied && this.selectedJob) {
+      this.addJobApplicationToDatabase(trackingData);
     }
+
+    // Show success message
+    this.showSuccessMessage(trackingData);
   }
 
-  // Save application data in track-applications format
-  private saveToTrackApplications(trackingData: ApplicationTrackingData): void {
-    try {
-      const trackApplicationsKey = 'trackApplicationsData';
-      const stored = localStorage.getItem(trackApplicationsKey);
-      let trackApplications = stored ? JSON.parse(stored) : [];
-
-      // Create track application entry
-      const trackApplication = {
-        id: `${trackingData.jobTitle}-${trackingData.company}`
-          .replace(/\s+/g, '-')
-          .toLowerCase(),
-        jobTitle: trackingData.jobTitle,
-        company: trackingData.company,
-        status: 'Applied' as ApplicationStatus,
-        appliedDate: trackingData.timestamp,
-        combinedMatchScore: '85%', // Default score for tracked applications
-        skillsRequired: 'JavaScript; TypeScript; Angular; Node.js',
-        location: 'Remote',
-        jobType: 'Full-time',
-        salaryRange: 'Competitive',
-      };
-
-      // Check if already exists
-      const existingIndex = trackApplications.findIndex(
-        (app: any) =>
-          app.jobTitle === trackApplication.jobTitle &&
-          app.company === trackApplication.company
-      );
-
-      if (existingIndex >= 0) {
-        // Update existing
-        trackApplications[existingIndex] = trackApplication;
-      } else {
-        // Add new
-        trackApplications.push(trackApplication);
-      }
-
-      localStorage.setItem(
-        trackApplicationsKey,
-        JSON.stringify(trackApplications)
-      );
-    } catch (error) {
-      console.error('Error saving to track applications:', error);
+  // Add job application to database
+  private addJobApplicationToDatabase(
+    trackingData: ApplicationTrackingData
+  ): void {
+    if (!this.selectedJob) {
+      console.error('No selected job found');
+      return;
     }
+
+    const addCommand: AddJobApplicationCommand = {
+      jobTitle: trackingData.jobTitle,
+      company: trackingData.company,
+      skillsRequired: this.selectedJob.skills_required,
+      combinedMatchScore: this.selectedJob.combined_match_score,
+      jobLink: this.selectedJob.job_link,
+      status: 'Applied', // Default status
+      updateDate: new Date(),
+    };
+
+    this.trackApplicationsService.addJobApplication(addCommand).subscribe({
+      next: (response: AddJobApplicationResponse) => {
+        if (response.success) {
+          console.log('Job application added successfully:', response.message);
+          // Show success toast notification
+          this.showSuccessToast(
+            `Application for ${trackingData.jobTitle} has been added to your tracking list!`
+          );
+        } else {
+          console.error('Failed to add job application:', response.message);
+          this.showErrorToast(
+            'Failed to add application to tracking list. Please try again.'
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Error adding job application:', error);
+        this.showErrorToast(
+          'An error occurred while adding the application. Please try again.'
+        );
+
+        // Remove from local history since database operation failed
+        const index = this.applicationHistory.findIndex(
+          (app) =>
+            app.jobTitle === trackingData.jobTitle &&
+            app.company === trackingData.company &&
+            app.timestamp === trackingData.timestamp
+        );
+        if (index > -1) {
+          this.applicationHistory.splice(index, 1);
+        }
+      },
+    });
   }
 
   // Handle modal close
   onModalClosed(): void {
     this.showApplyModal = false;
     this.selectedJob = null;
-  }
-
-  // Load application history from localStorage
-  private loadApplicationHistory(): void {
-    try {
-      const stored = localStorage.getItem('jobApplicationHistory');
-      if (stored) {
-        this.applicationHistory = JSON.parse(stored);
-      }
-    } catch (error) {
-      console.error('Error loading application history:', error);
-      this.applicationHistory = [];
-    }
-  }
-
-  // Save application history to localStorage
-  private saveApplicationHistory(): void {
-    try {
-      localStorage.setItem(
-        'jobApplicationHistory',
-        JSON.stringify(this.applicationHistory)
-      );
-    } catch (error) {
-      console.error('Error saving application history:', error);
-    }
   }
 
   // Show success message (you can customize this based on your UI needs)
@@ -188,6 +177,34 @@ export class RecommendationsComponent implements OnInit {
 
     // You can implement a toast notification or other UI feedback here
     console.log(message);
+  }
+
+  // Toast notification methods
+  private showSuccessToast(message: string): void {
+    this.toastMessage = message;
+    this.toastType = 'success';
+    this.showToast = true;
+
+    // Auto-hide toast after 5 seconds
+    setTimeout(() => {
+      this.hideToast();
+    }, 5000);
+  }
+
+  private showErrorToast(message: string): void {
+    this.toastMessage = message;
+    this.toastType = 'error';
+    this.showToast = true;
+
+    // Auto-hide toast after 5 seconds
+    setTimeout(() => {
+      this.hideToast();
+    }, 5000);
+  }
+
+  hideToast(): void {
+    this.showToast = false;
+    this.toastMessage = '';
   }
 
   // Check if user has already applied to a job

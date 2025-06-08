@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../env/env.developmnet';
+import { UpdateJobApplicationCommand, UpdateJobApplicationResponse } from './track-applications.service';
 
 export interface Job {
   job_title: string;
@@ -12,6 +13,7 @@ export interface Job {
   semantic_score: string;
   keyword_score: string;
   job_link: string;
+  jobApplicationId?: string;
 }
 
 export interface RecommendationsResponse {
@@ -35,6 +37,20 @@ export class RecommendationsService {
       .pipe(
         catchError((error) => {
           console.error('Error fetching recommended jobs:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  updateJobApplication(
+    jobApplicationId: string,
+    command: UpdateJobApplicationCommand
+  ): Observable<UpdateJobApplicationResponse> {
+    return this.http
+      .put<UpdateJobApplicationResponse>(`${this.API_URL}/TrackApplication/${jobApplicationId}`, command)
+      .pipe(
+        catchError((error) => {
+          console.error('Error updating job application:', error);
           return throwError(() => error);
         })
       );

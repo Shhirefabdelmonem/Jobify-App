@@ -283,3 +283,17 @@
   (modalClosed)="onModalClosed()"
 >
 </app-apply-pop-up>
+
+<!-- Toast Notification -->
+<div class="toast-notification" *ngIf="showToast" [class]="toastType">
+  <div class="toast-content">
+    <div class="toast-icon">
+      <i class="fas fa-check-circle" *ngIf="toastType === 'success'"></i>
+      <i class="fas fa-exclamation-circle" *ngIf="toastType === 'error'"></i>
+    </div>
+    <div class="toast-message">{{ toastMessage }}</div>
+    <button class="toast-close" (click)="hideToast()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</div>

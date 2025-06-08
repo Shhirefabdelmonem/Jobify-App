@@ -229,9 +229,64 @@
 }
 
 .loading-state p {
-  font-size: 16px;
-  color: #666;
+  color: #6b7280;
+  margin: 8px 0 0 0;
+  font-size: 14px;
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.error-content i {
+  font-size: 48px;
+  color: #ef4444;
+}
+
+.error-state h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
   margin: 0;
+}
+
+.error-state p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 16px;
+}
+
+.retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #00f0a0 0%, #d9ffe5 100%);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 240, 160, 0.3);
 }
 
 /* Applications List */

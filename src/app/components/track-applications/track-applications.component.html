@@ -1,6 +1,8 @@
 <div class="track-applications-container">
   <app-header></app-header>
 
+  
+
   <div class="main-content">
     <app-nav-sidebar></app-nav-sidebar>
 
@@ -46,8 +48,21 @@
         </div>
       </div>
 
+      <!-- Error State -->
+      <div *ngIf="error && !isLoading" class="error-state">
+        <div class="error-content">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Unable to load applications</h3>
+          <p>{{ error }}</p>
+          <button class="retry-btn" (click)="refreshApplications()">
+            <i class="fas fa-redo"></i>
+            Try Again
+          </button>
+        </div>
+      </div>
+
       <!-- Applications List -->
-      <div class="applications-list" *ngIf="!isLoading">
+      <div class="applications-list" *ngIf="!isLoading && !error">
         <!-- Job Cards -->
         <div class="job-cards" *ngIf="filteredApplications.length > 0">
           <div
@@ -83,16 +98,12 @@
                     [class]="getStatusClass(application.status)"
                     title="Update application status"
                     aria-label="Update application status"
-                    (change)="
-                      updateApplicationStatus(
-                        application.id,
-                        $any($event.target).value
-                      )
-                    "
+                    (change)="onStatusChange(application, $event)"
                   >
                     <option
                       *ngFor="let status of applicationStatuses"
                       [value]="status"
+                      [selected]="application.status === status"
                     >
                       {{ status }}
                     </option>
@@ -197,6 +208,7 @@
                   class="action-btn view"
                   title="View Original Job"
                   *ngIf="application.jobLink"
+                  (click)="openJobLink(application.jobLink)"
                 >
                   <i class="fas fa-external-link-alt"></i>
                 </button>
@@ -268,7 +280,7 @@
       <!-- Summary Section -->
       <div
         class="summary-section"
-        *ngIf="!isLoading && trackedApplications.length > 0"
+        *ngIf="!isLoading && !error && trackedApplications.length > 0"
       >
         <div class="summary-card">
           <h3>Application Summary</h3>

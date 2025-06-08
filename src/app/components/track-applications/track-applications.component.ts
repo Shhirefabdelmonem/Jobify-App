@@ -1,35 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NavSidebarComponent } from '../nav-sidebar/nav-sidebar.component';
 import { HeaderComponent } from '../header/header.component';
+import {
+  TrackApplicationsService,
+  JobApplicationDto as BackendJobApplicationDto,
+  ApplicationStatus,
+  UpdateJobApplicationCommand,
+} from '../../services/track-applications.service';
 
-export type ApplicationStatus =
-  | 'Applied'
-  | 'Get Assessment'
-  | 'Interviewing'
-  | 'Offer Received'
-  | 'Rejected'
-  | 'Archived';
-
-export interface TrackedApplication {
-  id: string;
-  jobTitle: string;
-  company: string;
-  status: ApplicationStatus;
-  appliedDate: Date;
-  jobLink?: string;
-  skillsRequired?: string;
-  combinedMatchScore?: string;
-  semanticScore?: string;
-  keywordScore?: string;
-  location?: string;
-  jobType?: string;
-  salaryRange?: string;
+// Frontend interface that extends backend DTO with additional properties
+interface JobApplicationDto extends BackendJobApplicationDto {
+  appliedDate: Date; // Mapped from updateDate
+  location?: string; // Optional property for display
+  jobType?: string; // Optional property for display
+  salaryRange?: string; // Optional property for display
 }
 
 @Component({
   selector: 'app-track-applications',
-  imports: [CommonModule, NavSidebarComponent, HeaderComponent],
+  imports: [CommonModule, FormsModule, NavSidebarComponent, HeaderComponent],
   templateUrl: './track-applications.component.html',
   styleUrl: './track-applications.component.css',
 })
@@ -47,172 +38,58 @@ export class TrackApplicationsComponent implements OnInit {
   // Currently selected tab
   selectedStatus: ApplicationStatus = 'Applied';
 
-  // All tracked applications
-  trackedApplications: TrackedApplication[] = [];
+  // All tracked applications from backend
+  trackedApplications: JobApplicationDto[] = [];
 
   // Filtered applications based on selected status
-  filteredApplications: TrackedApplication[] = [];
+  filteredApplications: JobApplicationDto[] = [];
 
   // Loading state
   isLoading: boolean = true;
 
-  constructor() {}
+  // Error state
+  error: string | null = null;
+
+  constructor(private trackApplicationsService: TrackApplicationsService) {}
 
   ngOnInit(): void {
     this.loadTrackedApplications();
   }
 
   /**
-   * Load tracked applications from localStorage and any other sources
+   * Load tracked applications from backend API
    */
   loadTrackedApplications(): void {
     this.isLoading = true;
+    this.error = null;
 
-    // Load from localStorage (from the apply popup modal)
-    const storedApplications = this.loadFromLocalStorage();
-
-    // Load from track applications data (saved by recommendations component)
-    const trackApplicationsData = this.loadFromTrackApplicationsData();
-
-    // Add some mock data for demonstration
-    const mockApplications = this.getMockApplications();
-
-    // Combine all applications (remove duplicates)
-    const allApplications = [
-      ...storedApplications,
-      ...trackApplicationsData,
-      ...mockApplications,
-    ];
-    this.trackedApplications =
-      this.removeDuplicateApplications(allApplications);
-
-    // Filter applications for the selected status
-    this.filterApplicationsByStatus();
-
-    this.isLoading = false;
-  }
-
-  /**
-   * Load applications from localStorage (from apply popup modal)
-   */
-  private loadFromLocalStorage(): TrackedApplication[] {
-    try {
-      const stored = localStorage.getItem('jobApplicationHistory');
-      if (stored) {
-        const history = JSON.parse(stored);
-        return history
-          .filter((item: any) => item.applied === true) // Only show applications where user said "Yes"
-          .map((item: any) => ({
-            id: `${item.jobTitle}-${item.company}`
-              .replace(/\s+/g, '-')
-              .toLowerCase(),
-            jobTitle: item.jobTitle,
-            company: item.company,
-            status: 'Applied' as ApplicationStatus,
-            appliedDate: new Date(item.timestamp),
-            combinedMatchScore: '85%', // Default score for tracked applications
-            skillsRequired: 'JavaScript; TypeScript; Angular; Node.js',
-            location: 'Remote',
-            jobType: 'Full-time',
-            salaryRange: 'Competitive',
-          }));
-      }
-      return [];
-    } catch (error) {
-      console.error('Error loading applications from localStorage:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Load applications from track applications data (saved by recommendations component)
-   */
-  private loadFromTrackApplicationsData(): TrackedApplication[] {
-    try {
-      const stored = localStorage.getItem('trackApplicationsData');
-      if (stored) {
-        const data = JSON.parse(stored);
-        return data.map((item: any) => ({
-          id: item.id,
-          jobTitle: item.jobTitle,
-          company: item.company,
-          status: item.status as ApplicationStatus,
-          appliedDate: new Date(item.appliedDate),
-          combinedMatchScore: item.combinedMatchScore || '85%',
-          skillsRequired:
-            item.skillsRequired || 'JavaScript; TypeScript; Angular; Node.js',
-          location: item.location || 'Remote',
-          jobType: item.jobType || 'Full-time',
-          salaryRange: item.salaryRange || 'Competitive',
-          jobLink: item.jobLink,
-        }));
-      }
-      return [];
-    } catch (error) {
-      console.error('Error loading track applications data:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Remove duplicate applications based on job title and company
-   */
-  private removeDuplicateApplications(
-    applications: TrackedApplication[]
-  ): TrackedApplication[] {
-    const seen = new Set<string>();
-    return applications.filter((app) => {
-      const key = `${app.jobTitle}-${app.company}`.toLowerCase();
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
+    this.trackApplicationsService.getAllJobApplications().subscribe({
+      next: (response) => {
+        if (
+          response.success &&
+          response.data &&
+          response.data.jobApplications
+        ) {
+          this.trackedApplications = response.data.jobApplications.map(
+            (app): JobApplicationDto => ({
+              ...app,
+              appliedDate: new Date(app.updateDate), // Map updateDate to appliedDate for display
+              location: 'Remote', // Default value since not provided by backend
+              jobType: 'Full-time', // Default value since not provided by backend
+              salaryRange: 'Competitive', // Default value since not provided by backend
+            })
+          );
+          this.filterApplicationsByStatus();
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching tracked applications:', error);
+        this.error =
+          'Failed to load tracked applications. Please try again later.';
+        this.isLoading = false;
+      },
     });
-  }
-
-  /**
-   * Get mock applications for demonstration
-   */
-  private getMockApplications(): TrackedApplication[] {
-    return [
-      {
-        id: 'backend-developer-oracle',
-        jobTitle: 'Back end developer',
-        company: 'Oracle / Data Governance · Data Management · Public Company',
-        status: 'Applied',
-        appliedDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
-        combinedMatchScore: '93%',
-        skillsRequired: 'Java; Spring Boot; MySQL; REST APIs; Microservices',
-        location: 'USA',
-        jobType: 'Full-Time',
-        salaryRange: '$80K - $120K',
-      },
-      {
-        id: 'frontend-engineer-lensa',
-        jobTitle: 'Frontend Engineer (India)',
-        company: 'Lensa / Gaming · Human Resources · Growth Stage',
-        status: 'Interviewing',
-        appliedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
-        combinedMatchScore: '89%',
-        skillsRequired: 'React; TypeScript; CSS; HTML; JavaScript',
-        location: 'United States',
-        jobType: 'Full-time',
-        salaryRange: '$70K - $100K',
-      },
-      {
-        id: 'software-engineer-brellium',
-        jobTitle: 'Software Engineer',
-        company: 'Brellium / Billing · Enterprise Software · Early Stage',
-        status: 'Applied',
-        appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        combinedMatchScore: '89%',
-        skillsRequired: 'Python; Django; PostgreSQL; AWS; Docker',
-        location: 'New York, NY',
-        jobType: 'Full-time',
-        salaryRange: '$110K/yr - $130K/yr',
-      },
-    ];
   }
 
   /**
@@ -224,85 +101,147 @@ export class TrackApplicationsComponent implements OnInit {
   }
 
   /**
+   * Safely cast status string to ApplicationStatus type
+   */
+  private castToApplicationStatus(status: string): ApplicationStatus {
+    return status as ApplicationStatus;
+  }
+
+  /**
    * Filter applications based on selected status
    */
   private filterApplicationsByStatus(): void {
     this.filteredApplications = this.trackedApplications.filter(
-      (app) => app.status === this.selectedStatus
+      (app) => this.castToApplicationStatus(app.status) === this.selectedStatus
     );
   }
 
   /**
    * Get count of applications for a specific status
    */
-  getStatusCount(status: ApplicationStatus): number {
+  getStatusCount(status: ApplicationStatus | string): number {
     return this.trackedApplications.filter((app) => app.status === status)
       .length;
   }
 
   /**
-   * Update application status and save to localStorage
+   * Handle status change from dropdown
+   */
+  onStatusChange(application: JobApplicationDto, event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const newStatus = target.value;
+
+    console.log(
+      `Dropdown changed: ${application.status} -> ${newStatus} for application ${application.jobApplicationId}`
+    );
+
+    if (newStatus && newStatus !== application.status) {
+      this.updateApplicationStatus(application, newStatus);
+    } else if (newStatus === application.status) {
+      console.log('Status unchanged, no update needed');
+    }
+  }
+
+  /**
+   * Update application status via backend API
    */
   updateApplicationStatus(
-    applicationId: string,
-    newStatus: ApplicationStatus
+    application: JobApplicationDto,
+    newStatus: string
   ): void {
-    // Find and update the application
-    const application = this.trackedApplications.find(
-      (app) => app.id === applicationId
+    // Prevent update if status is the same
+    if (application.status === newStatus) {
+      return;
+    }
+
+    console.log(
+      `Updating application ${application.jobApplicationId} from "${application.status}" to "${newStatus}"`
     );
-    if (application) {
-      const oldStatus = application.status;
-      application.status = newStatus;
 
-      // Save to localStorage
-      this.saveToLocalStorage();
+    const updateCommand: UpdateJobApplicationCommand = {
+      jobTitle: application.jobTitle,
+      company: application.company,
+      skillsRequired: application.skillsRequired,
+      combinedMatchScore: application.combinedMatchScore,
+      jobLink: application.jobLink,
+      status: newStatus as ApplicationStatus,
+    };
 
-      // Re-filter applications for current view
-      this.filterApplicationsByStatus();
+    // Store the old status for potential rollback
+    const oldStatus = application.status;
+    const oldSelectedStatus = this.selectedStatus;
 
-      // Show success message (you can implement toast notifications here)
-      console.log(
-        `Application status updated from "${oldStatus}" to "${newStatus}"`
-      );
+    // Optimistically update the UI
+    application.status = newStatus;
 
-      // Optional: Send to backend API
-      // this.sendStatusUpdateToBackend(applicationId, newStatus);
+    // Smart tab switching: if the new status is different from current tab,
+    // switch to the new status tab to show the user where their application went
+    const shouldSwitchTab = newStatus !== this.selectedStatus;
+    if (shouldSwitchTab) {
+      this.selectedStatus = newStatus as ApplicationStatus;
     }
+
+    // Re-filter applications to reflect the change
+    this.filterApplicationsByStatus();
+
+    // Send update to backend
+    this.trackApplicationsService
+      .updateJobApplication(application.jobApplicationId, updateCommand)
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            console.log(
+              `Application status successfully updated from "${oldStatus}" to "${newStatus}"`
+            );
+
+            if (shouldSwitchTab) {
+              console.log(
+                `Switched to ${newStatus} tab to show updated application`
+              );
+            }
+
+            // Update the application's updateDate to current date
+            application.appliedDate = new Date();
+          } else {
+            console.error('Backend returned unsuccessful response:', response);
+            this.handleUpdateError(
+              application,
+              oldStatus,
+              oldSelectedStatus,
+              'Update failed: ' + response.message
+            );
+          }
+        },
+        error: (error) => {
+          console.error('Failed to update application status:', error);
+          this.handleUpdateError(
+            application,
+            oldStatus,
+            oldSelectedStatus,
+            'Failed to update status. Please try again.'
+          );
+        },
+      });
   }
 
   /**
-   * Save tracked applications to localStorage
+   * Handle update errors by reverting changes and showing error message
    */
-  private saveToLocalStorage(): void {
-    try {
-      localStorage.setItem(
-        'trackApplicationsData',
-        JSON.stringify(this.trackedApplications)
-      );
-    } catch (error) {
-      console.error('Error saving applications to localStorage:', error);
-    }
-  }
-
-  /**
-   * Optional: Send status update to backend API
-   */
-  private sendStatusUpdateToBackend(
-    applicationId: string,
-    newStatus: ApplicationStatus
+  private handleUpdateError(
+    application: JobApplicationDto,
+    oldStatus: string,
+    oldSelectedStatus: ApplicationStatus,
+    errorMessage: string
   ): void {
-    // Implement API call to update application status on the backend
-    // Example:
-    // this.applicationService.updateApplicationStatus(applicationId, newStatus).subscribe({
-    //   next: (response) => console.log('Status updated on backend'),
-    //   error: (error) => console.error('Failed to update status on backend', error)
-    // });
+    // Revert the optimistic update
+    application.status = oldStatus;
+    this.selectedStatus = oldSelectedStatus;
+    this.filterApplicationsByStatus();
+
+    // Log error message
+    console.error(errorMessage);
   }
 
-  /**
-   * Helper methods for job card display (reused from recommendations component)
-   */
   getMatchPercentage(combinedMatchScore: string): number {
     return parseFloat(combinedMatchScore.replace('%', ''));
   }
@@ -359,7 +298,7 @@ export class TrackApplicationsComponent implements OnInit {
   /**
    * Get status-specific styling classes
    */
-  getStatusClass(status: ApplicationStatus): string {
+  getStatusClass(status: string): string {
     switch (status) {
       case 'Applied':
         return 'status-applied';
@@ -376,5 +315,28 @@ export class TrackApplicationsComponent implements OnInit {
       default:
         return 'status-default';
     }
+  }
+
+  /**
+   * Refresh the applications data
+   */
+  refreshApplications(): void {
+    this.loadTrackedApplications();
+  }
+
+  /**
+   * Open job link in new tab
+   */
+  openJobLink(jobLink: string): void {
+    window.open(jobLink, '_blank', 'noopener,noreferrer');
+  }
+
+  /**
+   * Force refresh of change detection (for debugging purposes)
+   */
+  forceRefresh(): void {
+    // Trigger change detection by creating new array references
+    this.trackedApplications = [...this.trackedApplications];
+    this.filterApplicationsByStatus();
   }
 }
