@@ -111,6 +111,16 @@ h2 span {
   background-color: #f5f5f5;
 }
 
+.google-signup:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f9f9f9;
+}
+
+.google-signup:disabled:hover {
+  background-color: #f9f9f9;
+}
+
 .google-signup img {
   width: 25px;
   height: 25px;

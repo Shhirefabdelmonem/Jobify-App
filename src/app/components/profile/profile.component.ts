@@ -11,6 +11,10 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProfileService } from '../../services/profile.service';
+import {
+  ResumeParserService,
+  ParsedProfileData,
+} from '../../services/resume-parser.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -27,12 +31,20 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class ProfileComponent implements OnInit {
   @ViewChild('formSection') formSection!: ElementRef;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   profileForm: FormGroup;
   isSubmitting = false;
+
+  // Resume upload properties
+  isParsingResume = false;
+  selectedFile: File | null = null;
+  uploadError: string | null = null;
 
   constructor(
     private _fb: FormBuilder,
     private profileService: ProfileService,
+    private resumeParserService: ResumeParserService,
     private toastr: ToastrService
   ) {
     this.profileForm = this._fb.group({
@@ -479,5 +491,155 @@ export class ProfileComponent implements OnInit {
     if (index >= 0 && index < tabs.length) {
       tabs[index].classList.add('active');
     }
+  }
+
+  // Resume upload methods
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+
+      // Validate file
+      const validation = this.resumeParserService.validateResumeFile(file);
+      if (!validation.valid) {
+        this.uploadError = validation.message;
+        this.selectedFile = null;
+        this.toastr.error(validation.message);
+        return;
+      }
+
+      this.selectedFile = file;
+      this.uploadError = null;
+      this.toastr.info(`Selected file: ${file.name}`);
+    }
+  }
+
+  uploadAndParseResume(): void {
+    if (!this.selectedFile) {
+      this.toastr.warning('Please select a resume file first.');
+      return;
+    }
+
+    // Confirm before parsing (will overwrite existing data)
+    if (this.profileForm.dirty) {
+      const confirmOverwrite = confirm(
+        'Parsing a resume will overwrite any existing form data. Do you want to continue?'
+      );
+      if (!confirmOverwrite) {
+        return;
+      }
+    }
+
+    this.isParsingResume = true;
+    this.uploadError = null;
+
+    this.resumeParserService.parseResume(this.selectedFile).subscribe({
+      next: (response) => {
+        this.isParsingResume = false;
+
+        if (response.success && response.data) {
+          this.autoFillFormWithParsedData(response.data);
+          this.toastr.success(
+            response.message || 'Resume parsed successfully!'
+          );
+          this.clearFileInput();
+        } else {
+          this.uploadError = response.message;
+          this.toastr.error(response.message);
+        }
+      },
+      error: (error) => {
+        this.isParsingResume = false;
+        this.uploadError =
+          'Failed to parse resume. Please try again or fill the form manually.';
+        this.toastr.error(this.uploadError);
+        console.error('Resume parsing error:', error);
+      },
+    });
+  }
+
+  autoFillFormWithParsedData(data: ParsedProfileData): void {
+    try {
+      // Clear existing form arrays
+      this.clearFormArrays();
+
+      // Fill personal information
+      this.profileForm.get('personal')?.patchValue(data.personal);
+
+      // Fill educations
+      data.educations.forEach((education) => {
+        const educationForm = this.createEducation();
+        educationForm.patchValue(education);
+        this.educations.push(educationForm);
+      });
+
+      // Fill experiences
+      data.experiences.forEach((experience) => {
+        const experienceForm = this.createExperience();
+        experienceForm.patchValue(experience);
+        this.experiences.push(experienceForm);
+      });
+
+      // Fill skills
+      data.skills.forEach((skill) => {
+        if (skill.skillName && skill.skillName.trim()) {
+          this.skills.push(this.createSkill(skill.skillName.trim()));
+        }
+      });
+
+      // Add default entries if arrays are empty
+      if (this.educations.length === 0) {
+        this.addEducation();
+      }
+      if (this.experiences.length === 0) {
+        this.addExperience();
+      }
+
+      // Mark form as touched to show validation states
+      this.profileForm.markAsTouched();
+
+      this.toastr.info(
+        'Profile auto-filled from resume. Please review and update as needed.'
+      );
+    } catch (error) {
+      console.error('Error auto-filling form:', error);
+      this.toastr.error(
+        'Error auto-filling form. Please check the data and try again.'
+      );
+    }
+  }
+
+  clearFormArrays(): void {
+    // Clear educations
+    while (this.educations.length !== 0) {
+      this.educations.removeAt(0);
+    }
+
+    // Clear experiences
+    while (this.experiences.length !== 0) {
+      this.experiences.removeAt(0);
+    }
+
+    // Clear skills
+    while (this.skills.length !== 0) {
+      this.skills.removeAt(0);
+    }
+  }
+
+  clearFileInput(): void {
+    this.selectedFile = null;
+    this.uploadError = null;
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  removeSelectedFile(): void {
+    this.clearFileInput();
+    this.toastr.info('File removed.');
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
   }
 }

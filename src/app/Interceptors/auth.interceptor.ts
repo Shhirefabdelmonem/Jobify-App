@@ -15,6 +15,11 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     return next(req);
   }
 
+  // Skip adding token for external APIs (like Affinda)
+  if (req.url.includes('api.affinda.com')) {
+    return next(req);
+  }
+
   // Add token to request
   const token = authService.getAccessToken();
   if (token) {

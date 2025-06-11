@@ -25,16 +25,24 @@
         <span>50% More Interview Invites</span>
       </div>
     </div>
-  
   </div>
 
   <div class="right-panel">
     <div class="signup-form-container">
       <h2>Sign in to <span>jobify</span></h2>
 
-      <button class="google-signup" (click)="signInWithGoogle()">
-        <img src="assets/images/icons/google-icon.svg" alt="Google" />
-        Sign in with Google
+      <button
+        class="google-signup"
+        (click)="signInWithGoogle()"
+        [disabled]="isLoading"
+      >
+        <img
+          src="assets/images/icons/google-icon.svg"
+          alt="Google"
+          *ngIf="!isLoading"
+        />
+        <span *ngIf="!isLoading">Sign in with Google</span>
+        <span *ngIf="isLoading">Signing in with Google...</span>
       </button>
 
       <div class="divider">
@@ -121,4 +129,3 @@
     </div>
   </div>
 </div>
-  

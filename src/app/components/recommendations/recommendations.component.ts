@@ -53,6 +53,7 @@ export class RecommendationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchRecommendedJobs();
+    this.loadExistingApplications();
   }
 
   fetchRecommendedJobs(): void {
@@ -70,6 +71,41 @@ export class RecommendationsComponent implements OnInit {
         console.error('Error fetching recommended jobs:', error);
         this.error = 'Failed to load recommended jobs. Please try again later.';
         this.isLoading = false;
+      },
+    });
+  }
+
+  /**
+   * Load existing job applications from database to restore applied status
+   */
+  private loadExistingApplications(): void {
+    this.trackApplicationsService.getAllJobApplications().subscribe({
+      next: (response) => {
+        if (
+          response.success &&
+          response.data &&
+          response.data.jobApplications
+        ) {
+          // Convert existing applications to ApplicationTrackingData format
+          this.applicationHistory = response.data.jobApplications.map(
+            (app) => ({
+              jobTitle: app.jobTitle,
+              company: app.company,
+              applied: true, // All entries in database are applied
+              timestamp: new Date(app.updateDate), // Convert to Date object
+              jobId: `${app.jobTitle}-${app.company}`,
+            })
+          );
+
+          console.log(
+            `Loaded ${this.applicationHistory.length} existing applications from database`
+          );
+        }
+      },
+      error: (error) => {
+        console.error('Error loading existing applications:', error);
+        // Don't show error to user as this is background loading
+        // The component will still work, just won't show applied status for existing apps
       },
     });
   }
@@ -94,8 +130,20 @@ export class RecommendationsComponent implements OnInit {
 
   // Handle application tracking response
   onApplicationTracked(trackingData: ApplicationTrackingData): void {
-    // Add to application history for local tracking
-    this.applicationHistory.push(trackingData);
+    // Check if this application already exists in history
+    const existingIndex = this.applicationHistory.findIndex(
+      (app) =>
+        app.jobTitle === trackingData.jobTitle &&
+        app.company === trackingData.company
+    );
+
+    if (existingIndex > -1) {
+      // Update existing entry
+      this.applicationHistory[existingIndex] = trackingData;
+    } else {
+      // Add new entry to application history for local tracking
+      this.applicationHistory.push(trackingData);
+    }
 
     // Log for debugging
     console.log('Application tracked:', trackingData);
@@ -152,8 +200,10 @@ export class RecommendationsComponent implements OnInit {
         // Remove from local history since database operation failed
         const index = this.applicationHistory.findIndex(
           (app) =>
-            app.jobTitle === trackingData.jobTitle &&
-            app.company === trackingData.company &&
+            app.jobTitle.toLowerCase().trim() ===
+              trackingData.jobTitle.toLowerCase().trim() &&
+            app.company.toLowerCase().trim() ===
+              trackingData.company.toLowerCase().trim() &&
             app.timestamp === trackingData.timestamp
         );
         if (index > -1) {
@@ -211,8 +261,8 @@ export class RecommendationsComponent implements OnInit {
   hasAppliedToJob(jobTitle: string, company: string): boolean {
     return this.applicationHistory.some(
       (app) =>
-        app.jobTitle === jobTitle &&
-        app.company === company &&
+        app.jobTitle.toLowerCase().trim() === jobTitle.toLowerCase().trim() &&
+        app.company.toLowerCase().trim() === company.toLowerCase().trim() &&
         app.applied === true
     );
   }
@@ -223,7 +273,9 @@ export class RecommendationsComponent implements OnInit {
     company: string
   ): 'applied' | 'not-applied' | 'unknown' {
     const application = this.applicationHistory.find(
-      (app) => app.jobTitle === jobTitle && app.company === company
+      (app) =>
+        app.jobTitle.toLowerCase().trim() === jobTitle.toLowerCase().trim() &&
+        app.company.toLowerCase().trim() === company.toLowerCase().trim()
     );
 
     if (!application) return 'unknown';
@@ -290,5 +342,12 @@ export class RecommendationsComponent implements OnInit {
     if (percentage >= 80) return 'Highly recommended - great opportunity!';
     if (percentage >= 70) return 'Worth considering - good potential.';
     return 'Review requirements carefully.';
+  }
+
+  /**
+   * Refresh application history from database
+   */
+  refreshApplicationHistory(): void {
+    this.loadExistingApplications();
   }
 }

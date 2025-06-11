@@ -31,9 +31,18 @@
     <div class="signup-form-container">
       <h2>Welcome to <span>jobify</span></h2>
 
-      <button class="google-signup" (click)="signUpWithGoogle()">
-        <img src="assets/images/icons/google-icon.svg" alt="Google" />
-        Sign up with Google
+      <button
+        class="google-signup"
+        (click)="signUpWithGoogle()"
+        [disabled]="isLoading"
+      >
+        <img
+          src="assets/images/icons/google-icon.svg"
+          alt="Google"
+          *ngIf="!isLoading"
+        />
+        <span *ngIf="!isLoading">Sign up with Google</span>
+        <span *ngIf="isLoading">Signing up with Google...</span>
       </button>
 
       <div class="divider">
