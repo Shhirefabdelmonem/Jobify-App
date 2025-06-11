@@ -82,15 +82,17 @@
 
           <div class="job-info-section">
             <div class="job-header">
-              <div class="posted-time">
-                <i class="far fa-clock"></i>
-                <span>{{ getTimeAgo(i) }}</span>
-              </div>
-
               <div class="company-logo">
-                <div class="logo-placeholder">
+                <div class="logo-placeholder" *ngIf="!job.image_link">
                   {{ getCompanyInitials(job.company) }}
                 </div>
+                <img
+                  *ngIf="job.image_link"
+                  [src]="job.image_link"
+                  [alt]="job.company + ' logo'"
+                  class="company-logo-img"
+                  (error)="onImageError($event, job)"
+                />
               </div>
 
               <div class="job-details">
@@ -99,6 +101,11 @@
                   <i class="fas fa-building"></i>
                   {{ job.company }}
                 </p>
+
+                <!-- Job Description Preview -->
+                <div class="job-description" *ngIf="job.job_description">
+                  <p>{{ getJobDescriptionPreview(job.job_description) }}</p>
+                </div>
 
                 <!-- Skills Tags -->
                 <div class="skills-section" *ngIf="job.skills_required">
@@ -115,17 +122,21 @@
 
                 <!-- Job Attributes -->
                 <div class="job-attributes">
-                  <div class="attribute">
+                  <div class="attribute" *ngIf="job.location">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span>Remote</span>
+                    <span>{{ job.location }}</span>
                   </div>
-                  <div class="attribute">
+                  <div class="attribute" *ngIf="job.job_type">
                     <i class="far fa-clock"></i>
-                    <span>Full-time</span>
+                    <span>{{ job.job_type }}</span>
                   </div>
-                  <div class="attribute">
-                    <i class="fas fa-dollar-sign"></i>
-                    <span>Competitive</span>
+                  <div class="attribute" *ngIf="job.work_type">
+                    <i class="fas fa-laptop"></i>
+                    <span>{{ job.work_type }}</span>
+                  </div>
+                  <div class="attribute" *ngIf="job.experience">
+                    <i class="fas fa-briefcase"></i>
+                    <span>{{ job.experience }}</span>
                   </div>
                 </div>
 

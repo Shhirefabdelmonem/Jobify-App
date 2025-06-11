@@ -350,4 +350,48 @@ export class RecommendationsComponent implements OnInit {
   refreshApplicationHistory(): void {
     this.loadExistingApplications();
   }
+
+  /**
+   * Format the date posted string for display
+   */
+  getFormattedDate(datePosted: string): string {
+    if (!datePosted) return 'Recently posted';
+
+    try {
+      const date = new Date(datePosted);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+      return `${Math.ceil(diffDays / 30)} months ago`;
+    } catch (error) {
+      return 'Recently posted';
+    }
+  }
+
+  /**
+   * Handle image loading errors by falling back to company initials
+   */
+  onImageError(event: any, job: Job): void {
+    // Hide the broken image and show fallback
+    event.target.style.display = 'none';
+    // You could also set a flag to show the logo placeholder instead
+    job.image_link = ''; // Clear the image link to show fallback
+  }
+
+  /**
+   * Get a preview of the job description (first 150 characters)
+   */
+  getJobDescriptionPreview(description: string): string {
+    if (!description) return '';
+
+    const cleanDescription = description.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    return cleanDescription.length > 150
+      ? cleanDescription.substring(0, 150) + '...'
+      : cleanDescription;
+  }
 }
